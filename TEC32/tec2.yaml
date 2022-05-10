@@ -1,0 +1,47 @@
+name: auditd_inc_fs
+
+type: any
+
+
+timeframe:
+  hours: 1
+  
+index: auditbeat-*
+
+filter:
+- query:
+     query_string:
+      query: "tags: INC_FS* AND agent.umgebung: EDST"
+
+        
+
+alert:
+- "email"
+- "elastalert_modules.zek_alert.ZekAlerter"
+
+zek_prio: 5 #Dieses Feld übergibt die Priorität des Events. Wichtig: Siehe dazu die INC-Prio-Matrix und Beschreibung Punkt 3.
+zek_automatic_ticket: 1 # Wert “0“ entspricht Usecase 2 (Alert wird direkt an das ITSM-Framework übergaben), Wert “1“ entspricht Usecase 1 (Alert wird in der ZEK angezeigt)
+zek_major_incident: 1
+zek_host_domain: "agent.domain"
+zek_duty_flag: 0 #Wert "0" führt zu keiner Aktivierung des Dutymanagements (Wichtig: “0“ ist der Standardwert für Autotickets, d.h. wenn zek_automatic_ticket = "1" darf kein Dutymanagement-Einsatz getriggert werden. Wert "1" führt zu einer Aktivierung des Dutymanagements. Wichtig: Wenn Duty-Management z.B. in Randzeiten aktiviert werden soll, muss der Alert gemäß Usecase1 behandelt werden.
+ars_group: "agent.inc_grp" #Hier wird die Ziel-ARS-Bearbeitergruppe eintragen, an die das INC-Ticket 
+zek_host_key: "agent.hostname"
+zek_enabled: "agent.inc_enabled"
+
+
+alert_text_type: alert_text_only
+
+alert_text_args:
+- _id
+
+# alert_text: "Link kibana: https://elk.sdst.sbaintern.de/s/it-linux/app/kibana#/discover?_g=(refreshInterval:(pause:!t,value:0),time:(from:now%2Fd,mode:quick,to:now%2Fd))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'2e662350-a41b-11eb-b48b-4bd8b8b9c812',key:_id,negate:!f,params:(query:{0},type:phrase),type:phrase,value:{0}),query:(match:(_id:(query:{0},type:phrase))))),index:'2e662350-a41b-11eb-b48b-4bd8b8b9c812',interval:auto,query:(language:lucene,query:''),sort:!('@timestamp',desc))"
+alert_text: "Systemintegrität \n_id: {0}\nLink : <https://elk.sdst.sbaintern.de/s/it-linux/app/kibana#/discover> \n\nDies Vorgehen hier ist ein WA da die Übergabe des Direktlink von ZEK zu ARS aktuell nicht funktioniert. Bitte obenstehenden Link öffnen und dort nach der obenstehenden ID suchen. Bitte Zeitfenster oben rechts im Webformular beachten da dieses die Suche begrenzt."
+
+
+smtp_host: "130.226.103.118"
+smtp_port: 465
+smtp_ssl: true
+smtp_auth_file: "/app/rules/smtp-password.txt"
+
+from_addr: "IT-Systemhaus.OPS1-ELK@arbeitsagentur.de"
+email: "gunnar.grimm@arbeitsagentur.de"
